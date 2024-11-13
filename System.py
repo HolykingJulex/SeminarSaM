@@ -57,6 +57,93 @@ class Matshell:
     def __repr__(self):
         return str(self)
     
+  
+
+
+class Spin:
+    vec = np.array([0,0,0])
+
+    #just three dimensional numpy vector for now
+    def __init__(self) -> None:
+        temp = np.array([rd.random(),rd.random(),rd.random()])
+        
+        while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
+            temp = np.array([rd.random(),rd.random(),rd.random()])
+
+        self.vec = self.normalize(temp)
+        pass
+
+    def normalize(self,temp) -> ndarray:
+        norm = np.linalg.norm(temp)
+        if norm == 0: 
+            raise ValueError('Some of your vectors have a norm of 0. I cant normalise that')
+        return temp / norm
+
+    def __str__(self)-> str:
+        return self.vec
+    
+    def __repr__(self)-> str:
+        #print(type( self.vec.tostring()))
+        return np.array_repr(self.vec)
+
+class Grid:
+    #Contains numpy array of all spins as vectors
+    data:ndarray[(Any, Any), Spin]
+    def __init__(self,size) -> None:
+        
+        self.data = np.ndarray(size,Spin)
+        for i in range(size[0]):
+            for j in range(size[1]):
+                for k in range(size[2]):
+                    self.data[i,j,k] = Spin()   # This constructor creates empty spins
+       
+
+        pass
+
+
+class TempField:
+    #contains either scalar or vectorial value for each spin
+    field:ndarray[(Any,Any),float]
+    def __init__(self,size,temp) -> None:
+        
+        self.field = np.ndarray(size,object)
+        for i in range(size[0]):
+            for j in range(size[1]):
+                for k in range(size[2]):
+                    self.field[i,j,k] = temp   
+        pass
+
+class OnSiteAnisotropies:
+    #contains either scalar or vectorial value for each spin
+    tensors:None
+    def __init__(self,size,tensor) -> None:
+        
+        self.tensors = np.ndarray(size,object)
+        for i in range(size[0]):
+            for j in range(size[1]):
+                for k in range(size[2]):
+                    self.tensors[i,j,k] = tensor   
+       
+        pass
+
+
+class MagField:
+    #contains either scalar or vectorial value for each spin
+    field:ndarray[(Any,Any),ndarray]
+    def __init__(self,size,vec) -> None:
+
+        self.field = np.ndarray(size,object)
+        for i in range(size[0]):
+            for j in range(size[1]):
+                for k in range(size[2]):
+                    self.field[i,j,k] = vec   
+
+        pass
+    
+    def update(self,time)-> None:
+        print("need to implemnt time dependence of the magnetic field")
+    
+    
 def get_Matshell(matfolder)-> List:
      Matshells = []
      counter = 0
@@ -130,109 +217,8 @@ def get_Matshell(matfolder)-> List:
 
               
      return Matshells
-     
+       
 
-
-class Spin:
-    vec = np.array([0,0,0])
-
-    #just three dimensional numpy vector for now
-    def __init__(self) -> None:
-        temp = np.array([rd.random(),rd.random(),rd.random()])
-        
-        while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
-            temp = np.array([rd.random(),rd.random(),rd.random()])
-
-        self.vec = self.normalize(temp)
-        pass
-
-    def normalize(self,temp) -> ndarray:
-        norm = np.linalg.norm(temp)
-        if norm == 0: 
-            raise ValueError('Some of your vectors have a norm of 0. I cant normalise that')
-        return temp / norm
-
-    def __str__(self)-> str:
-        return self.vec
-    
-    def __repr__(self)-> str:
-        #print(type( self.vec.tostring()))
-        return np.array_repr(self.vec)
-
-class Grid:
-    #Contains numpy array of all spins as vectors
-    data:ndarray[(Any, Any), Spin]
-    def __init__(self,size) -> None:
-        if len(size)>2:
-            self.data = np.ndarray(size,Spin)
-            for i in range(size[0]):
-                for j in range(size[1]):
-                    for k in range(size[2]):
-                        self.data[i,j,k] = Spin()   # This constructor creates empty spins
-        else:
-            self.data = np.ndarray(size,Spin)
-            for i in range(size[0]):
-                for j in range(size[1]):                
-                    self.data[i,j] = Spin()   # This constructor creates empty spins
-
-        pass
-
-
-class TempField:
-    #contains either scalar or vectorial value for each spin
-    field:ndarray[(Any,Any),float]
-    def __init__(self,size,temp) -> None:
-        if len(size)>2:
-            self.field = np.ndarray(size,object)
-            for i in range(size[0]):
-                for j in range(size[1]):
-                    for k in range(size[2]):
-                        self.field[i,j,k] = temp   # This constructor creates empty spins
-        else:
-            self.field = np.ndarray(size,object)
-            for i in range(size[0]):
-                for j in range(size[1]):
-                        self.field[i,j] = temp   # This constructor creates empty spins
-        pass
-
-class OnSiteAnisotropies:
-    #contains either scalar or vectorial value for each spin
-    tensors:None
-    def __init__(self,size,tensor) -> None:
-        if len(size)>2:
-            self.tensors = np.ndarray(size,object)
-            for i in range(size[0]):
-                for j in range(size[1]):
-                    for k in range(size[1]):
-                        self.tensors[i,j,k] = tensor   # This constructor creates empty spins
-        else:
-            self.tensors = np.ndarray(size,object)
-            for i in range(size[0]):
-                for j in range(size[1]):
-                        self.tensors[i,j] = tensor   # This constructor creates empty spins
-        pass
-
-
-class MagField:
-    #contains either scalar or vectorial value for each spin
-    field:ndarray[(Any,Any),ndarray]
-    def __init__(self,size,vec) -> None:
-        if len(size)>2:
-            self.field = np.ndarray(size,object)
-            for i in range(size[0]):
-                for j in range(size[1]):
-                    for k in range(size[1]):
-                        self.field[i,j,k] = vec   # This constructor creates empty spins
-        else:
-            self.field = np.ndarray(size,object)
-            for i in range(size[0]):
-                for j in range(size[1]):
-                        self.field[i,j] = vec   # This constructor creates empty spins
-        pass
-    
-    def update(self,time)-> None:
-        print("need to implemnt time dependence of the magnetic field")
-    
 
 class System:
     size:None
@@ -282,18 +268,15 @@ class System:
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
                     print("got shell here")
-                    sl = putStructure(i,j,k) # 0 because we only do a 2d lattice for now
+                    sl = putStructure(i,j,k) 
                     matshell = self.matshells[sl-1]
-                    if len(self.size) > 2:
-                        currentspin = self.grid[i,j,k]
-                    else:
-                        currentspin = self.grid[i,j]
+                    
+                    currentspin = self.grid[i,j,k]
                     
                     for Jtens in matshell.Js:
                         i = Jtens.i % self.size[0]
                         j = Jtens.j % self.size[1]
-                        if len(self.size) > 2:
-                            k = Jtens.k % self.size[2]
+                        k = Jtens.k % self.size[2]
                         
 
 
