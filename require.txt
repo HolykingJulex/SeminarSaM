@@ -1,0 +1,8 @@
+numpy
+scipy
+matplotlib
+pygame
+PyGLM
+moderngl
+pywavefront
+ipykernel
