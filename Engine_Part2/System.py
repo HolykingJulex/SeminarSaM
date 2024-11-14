@@ -56,41 +56,9 @@ class Matshell:
         return str(self.sl) +" "+ str( self.slname)+" "+ str( self.gamma)+" "+ str( self.Sz)+" " + str( self.alpha)+" "+ str( self.mu)+" "+ str( self.d2)+ str( self.d4)+" "+ str( len(self.Js))+"\n"
     def __repr__(self):
         return str(self)
-    
-  
+   
 
 
-class Spin:
-    vec = np.array([0,0,0])
-
-    #just three dimensional numpy vector for now
-    def __init__(self) -> None:
-        temp = np.array([rd.random(),rd.random(),rd.random()])
-        
-        while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
-            temp = np.array([rd.random(),rd.random(),rd.random()])
-
-        self.vec = self.normalize(temp)
-        return temp
-    
-    def __mul__(self,other):
-        return self.vec @ other.vec
-
-    def __rmul__(self,other):
-        return self.vec @ other.vec
-
-    def normalize(self,temp) -> ndarray:
-        norm = np.linalg.norm(temp)
-        if norm == 0: 
-            raise ValueError('Some of your vectors have a norm of 0. I cant normalise that')
-        return temp / norm
-
-    def __str__(self)-> str:
-        return self.vec
-    
-    def __repr__(self)-> str:
-        #print(type( self.vec.tostring()))
-        return np.array_repr(self.vec)
     
 def getnormspin():
     def normalize(temp) -> ndarray:
@@ -103,17 +71,6 @@ def getnormspin():
             temp = np.array([rd.random(),rd.random(),rd.random()])
     return normalize(temp)
 
-class TempField:
-    #contains either scalar or vectorial value for each spin
-    field:ndarray[(Any,Any),float]
-    def __init__(self,size,temp) -> None:
-        
-        self.field = np.ndarray(size,object)
-        for i in range(size[0]):
-            for j in range(size[1]):
-                for k in range(size[2]):
-                    self.field[i,j,k] = temp   
-        pass
 
 class OnSiteAnisotropies:
     #contains either scalar or vectorial value for each spin
@@ -225,7 +182,7 @@ def get_Matshell(matfolder)-> List:
 class System:
     size:None
     grid:ndarray[(Any, Any,Any,3), float]
-    temperature_Field:TempField
+    #temperature_Field:TempField
     mag_Field:MagField 
     onSiteAnisotropies:OnSiteAnisotropies
     startTime = 0
@@ -243,7 +200,7 @@ class System:
         self.size = size
         self.grid = self.init_grid()
         self.mag_Field = MagField(self.size,np.array([0,0,0])) # how do we update this
-        self.temperature_Field = TempField(self.size,0)
+        #self.temperature_Field = TempField(self.size,0)
         self.onSiteAnisotropies = OnSiteAnisotropies(self.size,0)
         self.alpha = self.matshells[0].alpha
         self.gamma = self.matshells[0].gamma
@@ -260,7 +217,6 @@ class System:
 
     def update(self):
         self.currentTime = self.currentTime + self.timestep
-        #newGrid = deepcopy(self.grid) 
         
         Heff = self.calculateExchangeVectors(self.grid)                  #This should be a vector
         Heff += self.mag_Field.field                                     #For B-Field this is also a vector
@@ -280,13 +236,12 @@ class System:
         new_grid = self.grid + 0.5 * self.timestep * (grid_tilde + self.LLG(grid_tilde,Heff) )
 
         #Need to normalie this beforehand
-        #print(new_grid.shape)
-        #new_grid = np.linalg.norm(new_grid,axis=3,keepdims=True)
         new_grid = self.normalise(new_grid)                                                     #TODO make faster
-        #print(new_grid.shape)
+
         self.grid = new_grid
 
-        return 0
+        pass
+    
     def normalise(self,grid):
         for i in range(self.size[0]):
             for j in range(self.size[1]):
@@ -302,9 +257,6 @@ class System:
         return np.array_repr(self.grid.data)
     
     def LLG(self,grid,Heff):
-        
-        #newgrid = np.zeros((self.size[0],self.size[1],self.size[2],3), float)
-        #print(grid.shape,Heff.shape)
         firstterm = np.cross(grid,Heff)
         secondterm = self.alpha * np.cross(grid,firstterm)
         return - self.gamma/((1+self.alpha**2)*self.mu) * (firstterm+secondterm)
@@ -320,15 +272,12 @@ class System:
                     matshell = self.matshells[sl-1]
                     vec = np.zeros((1,3),float)            #Todo check if this causes wierd behaviour
                     
-                    #currentspin = self.grid[i,j,k] # We dont care about the local spin here
-                    
                     for Jtens in matshell.Js:               #Going through all the interaction neigbors
                         oi = (i+Jtens.i) % self.size[0]
                         oj = (j+Jtens.j) % self.size[1]
                         ok = (k+Jtens.k) % self.size[2]
                         vec += (Jtens.matrix @ grid[oi,oj,ok])
-                        
-                        
+                                                
                     field[i,j,k] = vec
 
         return field
@@ -337,18 +286,11 @@ class System:
         field = np.zeros((self.size[0],self.size[1],self.size[2],3), float)
         for i in range(self.size[0]):
             for j in range(self.size[1]):
-                for k in range(self.size[2]):
-                    
+                for k in range(self.size[2]):                    
                     
                     sl = putStructure(i,j,k) 
                     matshell = self.matshells[sl-1]
-                    #vec = np.zeros((1,3),float)            #Todo check if this causes wierd behaviour
-                    
-                    #currentspin = self.grid[i,j,k] # We dont care about the local spin here
-                    
                     vec = (matshell.d2 @ grid[i,j,k])
-                        
-                        
                     field[i,j,k] = vec
 
         return field
