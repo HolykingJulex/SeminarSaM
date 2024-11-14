@@ -71,7 +71,7 @@ class Spin:
             temp = np.array([rd.random(),rd.random(),rd.random()])
 
         self.vec = self.normalize(temp)
-        pass
+        return temp
     
     def __mul__(self,other):
         return self.vec @ other.vec
@@ -91,8 +91,17 @@ class Spin:
     def __repr__(self)-> str:
         #print(type( self.vec.tostring()))
         return np.array_repr(self.vec)
-
-
+    
+def getnormspin():
+    def normalize(temp) -> ndarray:
+        norm = np.linalg.norm(temp)
+        if norm == 0: 
+            raise ValueError('Some of your vectors have a norm of 0. I cant normalise that')
+        return temp / norm
+    temp = np.array([rd.random(),rd.random(),rd.random()])
+    while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
+            temp = np.array([rd.random(),rd.random(),rd.random()])
+    return normalize(temp)
 
 class TempField:
     #contains either scalar or vectorial value for each spin
@@ -122,10 +131,10 @@ class OnSiteAnisotropies:
 
 class MagField:
     #contains either scalar or vectorial value for each spin
-    field:ndarray[(Any,Any),ndarray]
+    field:ndarray[(Any,Any,Any,3),float]
     def __init__(self,size,vec) -> None:
 
-        self.field = np.ndarray(size,object)
+        self.field = np.ndarray((size[0],size[1],size[2],3),float)
         for i in range(size[0]):
             for j in range(size[1]):
                 for k in range(size[2]):
@@ -215,15 +224,18 @@ def get_Matshell(matfolder)-> List:
 
 class System:
     size:None
-    grid:ndarray[(Any, Any), Spin]
+    grid:ndarray[(Any, Any,Any,3), float]
     temperature_Field:TempField
     mag_Field:MagField 
     onSiteAnisotropies:OnSiteAnisotropies
     startTime = 0
     endTime = 10
-    timestep = 0.001
+    timestep = 0.0000000000000001
     currentTime = 0
     matshells:Matshell
+    alpha:float
+    gamma:float
+    mu:float
 
     def __init__(self,size,shellfolder,*args) -> None:
         #TODO clever inputs here
@@ -233,47 +245,80 @@ class System:
         self.mag_Field = MagField(self.size,np.array([0,0,0])) # how do we update this
         self.temperature_Field = TempField(self.size,0)
         self.onSiteAnisotropies = OnSiteAnisotropies(self.size,0)
+        self.alpha = self.matshells[0].alpha
+        self.gamma = self.matshells[0].gamma
+        self.mu = self.matshells[0].mu
         pass
     
     def init_grid(self):
-        data = np.ndarray(self.size,Spin)
+        data = np.ndarray((self.size[0],self.size[1],self.size[2],3),float)
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
-                    data[i,j,k] = Spin()   # This constructor creates empty spins
+                    data[i,j,k] = getnormspin()   # This constructor creates empty spins
         return data
 
     def update(self):
         self.currentTime = self.currentTime + self.timestep
-        oldGrid = deepcopy(self.grid) #maybe not needed but good as safty
-        #update field first. No time in temp needed for now
-        test = self.calculateExchangeVectors(oldGrid)                  #This should be a vector
-        test += self.mag_Field.field                  #For B-Field this is also a vector
-                                                                       #Like in calculation for linearised LLG (first two pages)
-        #get effective field
-        #Hef = foo(oldGrid)
+        #newGrid = deepcopy(self.grid) 
         
-        #make new field based on old field and the effective field and temps
-        #self.Grid = foo(oldGrid,Hef,temp)
-        return test
+        Heff = self.calculateExchangeVectors(self.grid)                  #This should be a vector
+        Heff += self.mag_Field.field                                     #For B-Field this is also a vector
+        Heff += self.calculateAnisVectors(self.grid)                         
+                                                        
 
+        # Now we do the guess step in Heuns method
+
+        grid_tilde = self.grid + self.timestep * self.LLG(self.grid,Heff)
+
+        # Now we do the corrector step in Heuns method
+
+        Heff = self.calculateExchangeVectors(grid_tilde)                    #This should be a vector
+        Heff += self.mag_Field.field                                        #For B-Field this is also a vector
+        Heff += self.calculateAnisVectors(grid_tilde) 
+
+        new_grid = self.grid + 0.5 * self.timestep * (grid_tilde + self.LLG(grid_tilde,Heff) )
+
+        #Need to normalie this beforehand
+        #print(new_grid.shape)
+        #new_grid = np.linalg.norm(new_grid,axis=3,keepdims=True)
+        new_grid = self.normalise(new_grid)                                                     #TODO make faster
+        #print(new_grid.shape)
+        self.grid = new_grid
+
+        return 0
+    def normalise(self,grid):
+        for i in range(self.size[0]):
+            for j in range(self.size[1]):
+                for k in range(self.size[2]):
+                    vec = grid[i,j,k]
+                    grid[i,j,k] = vec/np.linalg.norm(vec)
+        return grid
 
     def __str__(self):
         return np.array_repr(self.grid.data)
     
     def __repr__(self):
         return np.array_repr(self.grid.data)
+    
+    def LLG(self,grid,Heff):
+        
+        #newgrid = np.zeros((self.size[0],self.size[1],self.size[2],3), float)
+        #print(grid.shape,Heff.shape)
+        firstterm = np.cross(grid,Heff)
+        secondterm = self.alpha * np.cross(grid,firstterm)
+        return - self.gamma/((1+self.alpha**2)*self.mu) * (firstterm+secondterm)
 
-    def calculateExchangeVectors(self,grid)-> float:
-        field = ndarray[self.size, Spin]
+
+    def calculateExchangeVectors(self,grid):
+        field = np.zeros((self.size[0],self.size[1],self.size[2],3), float)
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
-                    print("got shell here")
-                    print(i,j,k)
+                    
                     sl = putStructure(i,j,k) 
                     matshell = self.matshells[sl-1]
-                    vec = np.array([0,0,0])
+                    vec = np.zeros((1,3),float)            #Todo check if this causes wierd behaviour
                     
                     #currentspin = self.grid[i,j,k] # We dont care about the local spin here
                     
@@ -281,63 +326,33 @@ class System:
                         oi = (i+Jtens.i) % self.size[0]
                         oj = (j+Jtens.j) % self.size[1]
                         ok = (k+Jtens.k) % self.size[2]
-                        vec += Jtens.matrix * self.grid[oi,oj,ok]
+                        vec += (Jtens.matrix @ grid[oi,oj,ok])
                         
                         
                     field[i,j,k] = vec
 
         return field
+
+    def calculateAnisVectors(self,grid):
+        field = np.zeros((self.size[0],self.size[1],self.size[2],3), float)
+        for i in range(self.size[0]):
+            for j in range(self.size[1]):
+                for k in range(self.size[2]):
+                    
+                    
+                    sl = putStructure(i,j,k) 
+                    matshell = self.matshells[sl-1]
+                    #vec = np.zeros((1,3),float)            #Todo check if this causes wierd behaviour
+                    
+                    #currentspin = self.grid[i,j,k] # We dont care about the local spin here
+                    
+                    vec = (matshell.d2 @ grid[i,j,k])
+                        
+                        
+                    field[i,j,k] = vec
+
+        return field
+
     
-    def exchange_interaction_field(self,oldgrid):
-        out = np.zeros(shape=(self.grid.shape))
-        return oldgrid
 
-    def anisotropy_interaction_field(self):
-        return self.grid
-    
-    def dS_llg(self,grid,Heff):
-        return self.grid
-    
-    def normalise(self):
-        for index,sp in enumerate(self.grid):
-            self.grid[index] = sp.normalise()
-    
-    def integrate(self) -> float:
-    # compute external fields. These fields does not change
-    # because they don't depend on the state
-        oldGrid = deepcopy(self.grid)
-        #Hext = self.temperature_Field.field 'TODO figure out how to do this
-        Hext = self.mag_Field.field
-
-        # predictor step
-
-        # compute the effective field as the sum of external fields and
-        # spin fields
-        Heff = Hext + self.exchange_interaction_field(oldGrid)
-        Heff = Heff + self.anisotropy_interaction_field(oldGrid)
-
-        # compute dS based on the LLG equation
-        dS = self.dS_llg(self.grid,Heff)
-
-        # compute the state_prime
-        state_prime = self.grid + self.timestep * dS
-
-        # normalize state_prime
-        state_prime = self.normalize(state_prime)
-
-        # corrector step
-
-        # compute the effective field prime by using the state_prime. We
-        # use the Heff variable for this in order to reutilize the memory.
-        Heff = Hext + self.exchange_interaction_field( )
-        Heff = Heff + self.anisotropy_interaction_field()
-
-        # compute dS_prime employing the Heff prime and the state_prime
-        dS_prime = self.dS_llg(state_prime, Heff)
-
-        # compute the new state
-        integrate = self.grid + 0.5 * (dS + dS_prime) * self.timestep
-
-        # normalize the new state
-        return self.normalize(integrate)
 
