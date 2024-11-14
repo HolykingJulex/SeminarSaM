@@ -247,7 +247,9 @@ class System:
         self.currentTime = self.currentTime + self.timestep
         oldGrid = deepcopy(self.grid) #maybe not needed but good as safty
         #update field first. No time in temp needed for now
-        test = self.calculateExchange(oldGrid)
+        test = self.calculateExchangeVectors(oldGrid)                  #This should be a vector
+        test += self.mag_Field.field                  #For B-Field this is also a vector
+                                                                       #Like in calculation for linearised LLG (first two pages)
         #get effective field
         #Hef = foo(oldGrid)
         
@@ -262,8 +264,8 @@ class System:
     def __repr__(self):
         return np.array_repr(self.grid.data)
 
-    def calculateExchange(self,grid)-> float:
-        out = 0
+    def calculateExchangeVectors(self,grid)-> float:
+        field = ndarray[self.size, Spin]
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
@@ -271,18 +273,20 @@ class System:
                     print(i,j,k)
                     sl = putStructure(i,j,k) 
                     matshell = self.matshells[sl-1]
+                    vec = np.array([0,0,0])
                     
-                    currentspin = self.grid[i,j,k]
+                    #currentspin = self.grid[i,j,k] # We dont care about the local spin here
                     
                     for Jtens in matshell.Js:               #Going through all the interaction neigbors
                         oi = (i+Jtens.i) % self.size[0]
                         oj = (j+Jtens.j) % self.size[1]
                         ok = (k+Jtens.k) % self.size[2]
-                        dotpr = currentspin * self.grid[oi,oj,ok]
-                        print(Jtens.j,[oi,oj,ok])
+                        vec += Jtens.matrix * self.grid[oi,oj,ok]
+                        
+                        
+                    field[i,j,k] = vec
 
-
-        return 0
+        return field
     
     def exchange_interaction_field(self,oldgrid):
         out = np.zeros(shape=(self.grid.shape))
