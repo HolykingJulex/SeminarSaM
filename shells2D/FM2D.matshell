@@ -3,7 +3,7 @@ FeA
 gamma[gamma0]   1.0
 alpha           0.001
 mu[muBohr]      4.2313
-d2[meV]         0.0 0.0 0.1128
+d2[meV]         0.0 0.0 0.4
 d4[meV]         0.0 0.0 0.0011
 d6[meV]         0.0 0.0 0.0
 d66[meV]        0.0
