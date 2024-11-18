@@ -43,8 +43,9 @@ class CubeVBO(BaseVBO):
         return np.array(data, dtype='f4')
 
     def get_vertex_data(self):
-        vertices = [(-1, -2, 1), ( 1, -2,  1), (1,  2,  1), (-1, 2,  1),
-                    (-1, 2, -1), (-1, -2, -1), (1, -2, -1), ( 1, 2, -1)]
+        scale = 5 # for scaling the box in z-dir
+        vertices = [(-1, -scale, 1), ( 1, -scale,  1), (1,  scale,  1), (-1, scale,  1),
+                    (-1, scale, -1), (-1, -scale, -1), (1, -scale, -1), ( 1, scale, -1)]
 
         indices = [(0, 2, 3), (0, 1, 2),
                    (1, 7, 2), (1, 6, 7),

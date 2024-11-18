@@ -69,7 +69,7 @@ def getnormspin():
     temp = np.array([rd.random(),rd.random(),rd.random()])
     while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
             temp = np.array([rd.random(),rd.random(),rd.random()])
-    #return normalize(temp)
+    return normalize(temp)
     return  normalize(np.array([0,0.5,1]))
 
 
@@ -188,7 +188,7 @@ class System:
     onSiteAnisotropies:OnSiteAnisotropies
     startTime = 0
     endTime = 10
-    timestep = 0.0000000000001
+    timestep = 0.00000000000001
     currentTime = 0
     matshells:Matshell
     alpha:float

@@ -53,14 +53,14 @@ class Cube(BaseModel):
         theta_x = 0
         theta_z = np.arccos(gr.grid[self.idx[0],self.idx[1],self.idx[2],2])
         theta_y = np.arctan2(gr.grid[self.idx[0],self.idx[1],self.idx[2],1],gr.grid[self.idx[0],self.idx[1],self.idx[2],0])
-        print("theta_z ",theta_z)
+        #print("theta_z ",theta_z)
         
         # Putting the difference compared to the last angles in a vec
         self.rot = glm.vec3([theta_x-self.rot.x,
                              theta_y-self.rot.y,
                              theta_z-self.rot.z])
         self.rot = glm.vec3([theta_x,theta_y,theta_z])
-        print("it should face in this direction ",gr.grid[self.idx[0],self.idx[1],self.idx[2]])
+        #print("it should face in this direction ",gr.grid[self.idx[0],self.idx[1],self.idx[2]])
         #
 
         #TODO find out the coordinate system, i somehow assume that z is outofMonitor 
@@ -89,7 +89,7 @@ class Cube(BaseModel):
 
         #Setting the current rotation 
         self.rot = glm.vec3([theta_x,theta_y,theta_z])
-        print("but is rotated in this direction as angle ",np.rad2deg(self.rot))
+        #print("but is rotated in this direction as angle ",np.rad2deg(self.rot))
 
         self.program['camPos'].write(self.camera.position)
         self.program['m_view'].write(self.camera.m_view)
