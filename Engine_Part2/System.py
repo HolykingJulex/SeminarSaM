@@ -214,6 +214,13 @@ class System:
                 for k in range(self.size[2]):
                     data[i,j,k] = getnormspin()   # This constructor creates empty spins
         return data
+    
+    def returnangles(self,i,j,k):
+        dir = self.grid[i,j,k]
+        xan = 0
+        yan = 0
+        zan = 0
+        return (xan,yan,zan)
 
     def update(self):
         self.currentTime = self.currentTime + self.timestep

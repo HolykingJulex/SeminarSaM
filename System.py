@@ -6,7 +6,7 @@ import random as rd
 import os
 import re
 from scipy import constants
-from copy import deepcopy
+
 
 from structure.sc_FM import *
 
@@ -243,8 +243,8 @@ class System:
         self.size = size
         self.grid = self.init_grid()
         self.mag_Field = MagField(self.size,np.array([0,0,0])) # how do we update this
-        self.temperature_Field = TempField(self.size,0)
-        self.onSiteAnisotropies = OnSiteAnisotropies(self.size,0)
+        #self.temperature_Field = TempField(self.size,0)
+        #self.onSiteAnisotropies = OnSiteAnisotropies(self.size,0)
         self.alpha = self.matshells[0].alpha
         self.gamma = self.matshells[0].gamma
         self.mu = self.matshells[0].mu

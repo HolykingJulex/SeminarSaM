@@ -29,18 +29,30 @@ class BaseModel:
         m_model = glm.scale(m_model, self.scale)
         return m_model
 
-    def render(self):
-        self.update()
+    def render(self,gr=None):
+        self.update(gr)
         self.vao.render()
 
 
 class Cube(BaseModel):
-    def __init__(self, app, vao_name='cube', tex_id=0, pos=(0, 0, 0), rot=(0, 0, 0), scale=(0.5, 10, 1)):
+    def __init__(self, app, vao_name='cube', tex_id=0, pos=(0, 0, 0), rot=(0, 0, 0), scale=(0.5, 5, 1),idx = (0,0,0)):
         super().__init__(app, vao_name, tex_id, pos, rot, scale)
         self.on_init()
+        self.idx = idx
 
-    def update(self):
+    def update(self,gr):
         self.texture.use()
+        theta_x = 0
+        theta_y = np.arcsin(gr.grid[self.idx[0],self.idx[1],self.idx[2],2])
+        theta_z = np.arctan2(gr.grid[self.idx[0],self.idx[1],self.idx[2],1],gr.grid[self.idx[0],self.idx[1],self.idx[2],0])
+        
+        
+        self.rot = glm.vec3([theta_x,theta_y,theta_z])
+        
+        self.m_model = glm.rotate(self.m_model, self.rot.z, glm.vec3(0, 0, 1))
+        self.m_model = glm.rotate(self.m_model, self.rot.y, glm.vec3(0, 1, 0))
+        self.m_model = glm.rotate(self.m_model, self.rot.x, glm.vec3(1, 0, 0))
+
         self.program['camPos'].write(self.camera.position)
         self.program['m_view'].write(self.camera.m_view)
         self.program['m_model'].write(self.m_model)
@@ -87,24 +99,4 @@ class Cat(BaseModel):
         self.program['light.Ia'].write(self.app.light.Ia)
         self.program['light.Id'].write(self.app.light.Id)
         self.program['light.Is'].write(self.app.light.Is)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

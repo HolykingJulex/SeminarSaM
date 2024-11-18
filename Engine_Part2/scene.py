@@ -1,5 +1,5 @@
 from model import *
-
+import numpy as np
 
 class Scene:
     def __init__(self, app):
@@ -17,10 +17,13 @@ class Scene:
         for i in range(n1):
             for j in range(n2):
                 for k in range(n3):
-                    self.add_object(Cube(app, pos=(i*s, -s*k, j*s),rot=(gr.grid[i,j,k,0]*100,gr.grid[i,j,k,1]*100,gr.grid[i,j,k,2]*100)))
+                    theta_x = 0
+                    theta_y = np.arccos(gr.grid[i,j,k,2])
+                    theta_z = np.arctan2(gr.grid[i,j,k,1],gr.grid[i,j,k,0])
+                    self.add_object(Cube(app, pos=(i*s, -s*k, j*s),rot=(theta_x,theta_y,theta_z),idx=(i,j,k)))
 
         #self.add_object(Cat(app, pos=(0, -2, -10)))
 
-    def render(self):
+    def render(self,gr=None):
         for obj in self.objects:
-            obj.render()
+            obj.render(gr)
