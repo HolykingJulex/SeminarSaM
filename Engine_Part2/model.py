@@ -67,21 +67,6 @@ class Cube(BaseModel):
      
 
 
-        #PROBLEM the scales are fixed in x,y,z dir NOT body dir used scales object insteatd
-
-        #anglenorm  = (theta_x+theta_y+theta_z)/3
-        #scales = (theta_x/anglenorm+1, theta_y/anglenorm+1, theta_z/anglenorm+1)
-        #scales = (1,1,1)
-
-        #self.scale = (1,1/self.scale[1],1/self.scale[2]) #Redoing the last scale
-        #self.m_model = glm.scale(self.m_model, self.scale) # need to update scale aswell ugh
-
-
-        #self.scale = (1,2,1)                            # Making the new scale 
-        #self.scale = scales                            # Making the new scale 
-        #self.m_model = glm.scale(self.m_model, self.scale) # need to update scale aswell ugh
-
-
         self.program['camPos'].write(self.camera.position)
         self.program['m_view'].write(self.camera.m_view)
         self.program['m_model'].write(self.m_model)

@@ -20,11 +20,11 @@ class Scene:
                     theta_x = 0
                     theta_y = np.arccos(gr.grid[i,j,k,2])
                     theta_z = np.arctan2(gr.grid[i,j,k,1],gr.grid[i,j,k,0])
-                    #self.add_object(Cube(app, pos=(i*s, -s*k, j*s),rot=(theta_x,theta_y,theta_z),idx=(i,j,k),scale=(1,1,1)))
+                    self.add_object(Vec(app, pos=(i*s, -s*k, j*s),rot=(theta_x,theta_y,theta_z),idx=(i,j,k),scale=(10,10,10)))
                     #self.add_object(Cat(app, pos=(i*s, -s*k, j*s),rot=(theta_x,theta_y,theta_z),idx=(i,j,k),scale=(1,1,1)))
 
-        self.add_object(Cat(app, pos=(0, 0, 0),scale=(0.01,0.01,10)))
-        self.add_object(Vec(app, pos=(1, 1, 1),scale=(1,1,1)))
+        self.add_object(Cat(app, pos=(0, 0, 0),scale=(0.01,0.01,10))) # marks the z-axis
+        #self.add_object(Vec(app, pos=(1, 1, 1),scale=(10,10,10)))
 
     def render(self,gr=None):
         for obj in self.objects:
