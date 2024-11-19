@@ -222,12 +222,24 @@ class System:
         yan = 0
         zan = 0
         return (xan,yan,zan)
+    
+    def rotatingBfield(self):
+        #field = np.ndarray((self.size[0],self.size[1],self.size[2],3),float)
+        for i in range(self.size[0]):
+            for j in range(self.size[1]):
+                for k in range(self.size[2]):
+                    if j > self.size[1]-2:
+                        #self.mag_Field.field[i,j,k] =  5* np.array((np.sin(self.currentTime),np.cos(self.currentTime),1))
+                        self.mag_Field.field[i,j,k] =   np.array((0,0,1))
+                    
+        return self.mag_Field.field
 
     def update(self):
         self.currentTime = self.currentTime + self.timestep
         
         Heff = self.calculateExchangeVectors(self.grid)                  #This should be a vector
-        Heff += self.mag_Field.field                                     #For B-Field this is also a vector
+        #Heff += self.mag_Field.field * 10**(-12)                         #For B-Field this is also a vector
+        Heff += self.rotatingBfield()                         #For B-Field this is also a vector
         Heff += self.calculateAnisVectors(self.grid)                         
                                                         
 
@@ -282,9 +294,11 @@ class System:
                     
                     for Jtens in matshell.Js:               #Going through all the interaction neigbors
                         oi = (i+Jtens.i) % self.size[0]
-                        oj = (j+Jtens.j) % self.size[1]
+                        #oj = (j+Jtens.j) % self.size[1]     #wo dont want periodic in this direction
+                        oj = j+Jtens.j     
                         ok = (k+Jtens.k) % self.size[2]
-                        vec += (Jtens.matrix @ grid[oi,oj,ok])
+                        if (oj < self.size[1]) & (oj >-1):
+                            vec += (Jtens.matrix @ grid[oi,oj,ok])
                                                 
                     field[i,j,k] = vec
 
