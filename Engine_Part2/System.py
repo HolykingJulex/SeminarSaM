@@ -131,8 +131,8 @@ def get_Matshell(matfolder)-> List:
                               current_mat.gamma = float(re.findall("\d+\.\d+", line)[0]) * cons.gamma_e# need gyromagnetic ratio here in the right units
                          
                          if line.startswith("alpha"):
-                              #current_mat.alpha = float(re.findall("\d+\.\d+", line)[0]) #problem with scientific notation 
-                              current_mat.alpha = 0.00001
+                              current_mat.alpha = float(re.findall("\d+\.\d+", line)[0]) #problem with scientific notation 
+                              #current_mat.alpha = 0.00001
 
                          if line.startswith("mu"):
                               current_mat.mu = float(re.findall("\d+\.\d+", line)[0]) * cons.mu_B
@@ -224,26 +224,14 @@ class System:
         zan = 0
         return (xan,yan,zan)
     
-    def rotatingBfield(self):
+    def rotatingBfield(self,grid):
         #field = np.ndarray((self.size[0],self.size[1],self.size[2],3),float)
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
-                    #if j > self.size[1]-1:
                     if j < 1:
-                        #self.grid[i,j,k] =  normalize( np.array((np.sin(self.currentTime),np.cos(self.currentTime),5)))
-                        self.grid[i,j,k] =  normalize( np.array((np.sin(self.currentTime*3.5*10**12),np.cos(self.currentTime*3.5*10**12),3)))
-                        #if i <1:
-                        #    print(np.sin(self.currentTime*10**13))
-                        #    print(i,j,k)
-                        #    print(self.grid[i,j,k])
-                        #temp = np.array([rd.random(),rd.random(),rd.random()])
-                        #while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
-                        #        temp = np.array([rd.random(),rd.random(),rd.random()])
-                        #self.grid[i,j,k] = normalize(temp)
-                        #self.mag_Field.field[i,j,k] =  normalize( np.array((np.sin(self.currentTime),np.cos(self.currentTime),100)))
-                        #self.mag_Field.field[i,j,k] =   np.array((0,0,1))
-                    
+                        grid[i,j,k] =  normalize( np.array((np.sin(self.currentTime*4.5*10**12),np.cos(self.currentTime*4.5*10**12),1)))
+        
         return self.mag_Field.field
 
     def update(self):
@@ -251,7 +239,7 @@ class System:
         
         Heff = self.calculateExchangeVectors(self.grid)                  #This should be a vector
         #Heff += self.mag_Field.field * 10**(-12)                         #For B-Field this is also a vector
-        Heff += self.rotatingBfield()                         #For B-Field this is also a vector
+        Heff += self.rotatingBfield(self.grid)                         #For B-Field this is also a vector
         Heff += self.calculateAnisVectors(self.grid)                         
                                                         
 
@@ -262,7 +250,7 @@ class System:
         # Now we do the corrector step in Heuns method
 
         Heff = self.calculateExchangeVectors(grid_tilde)                    #This should be a vector
-        Heff += self.mag_Field.field                                        #For B-Field this is also a vector
+        Heff += self.rotatingBfield(grid_tilde)                                        #For B-Field this is also a vector
         Heff += self.calculateAnisVectors(grid_tilde) 
 
         new_grid = self.grid + 0.5 * self.timestep * (grid_tilde + self.LLG(grid_tilde,Heff) )

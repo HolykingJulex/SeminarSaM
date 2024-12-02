@@ -135,10 +135,6 @@ class Vec(BaseModel):
         if (np.abs(gr.grid[self.idx[0],self.idx[1],self.idx[2],1]) < 0.001) & (np.abs(gr.grid[self.idx[0],self.idx[1],self.idx[2],0]) < 0.001):
           theta_y = 0
         
-        #if self.idx[0] < 1:
-        #    if self.idx[1] < 1:
-        #        print(self.idx[0],self.idx[1],self.idx[2])
-         #       print(gr.grid[self.idx[0],self.idx[1],self.idx[2],2],theta_z)
 
         self.rot = glm.vec3([0,theta_y,theta_z])
         
