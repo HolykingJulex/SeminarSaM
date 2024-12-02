@@ -131,6 +131,11 @@ class Vec(BaseModel):
         
         theta_z = np.arccos(gr.grid[self.idx[0],self.idx[1],self.idx[2],2])
         theta_y = np.arctan2(gr.grid[self.idx[0],self.idx[1],self.idx[2],1],gr.grid[self.idx[0],self.idx[1],self.idx[2],0])
+    
+        if (gr.grid[self.idx[0],self.idx[1],self.idx[2],1] < 0.1) & (gr.grid[self.idx[0],self.idx[1],self.idx[2],0] < 0.1):
+          theta_y = 0
+        
+        
 
         self.rot = glm.vec3([0,theta_y,theta_z])
         

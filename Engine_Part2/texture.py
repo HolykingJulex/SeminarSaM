@@ -7,7 +7,7 @@ class Texture:
         self.ctx = ctx
         self.textures = {}
         self.textures[0] = self.get_texture(path='textures/test.png')
-        #self.textures[0] = self.get_texture(path='textures/img_1.png')
+        #self.textures[0] = self.get_texture(path='textures/img_3.png')
         self.textures[1] = self.get_texture(path='textures/img_1.png')
         self.textures[2] = self.get_texture(path='textures/img_2.png')
         self.textures['cat'] = self.get_texture(path='objects/cat/20430_cat_diff_v1.jpg')

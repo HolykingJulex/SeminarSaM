@@ -69,8 +69,8 @@ def getnormspin():
     temp = np.array([rd.random(),rd.random(),rd.random()])
     while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
             temp = np.array([rd.random(),rd.random(),rd.random()])
-    return normalize(temp)
-    return  normalize(np.array([0,0.5,1]))
+    #return normalize(temp)
+    return  normalize(np.array([0,0,1]))
 
 
 class OnSiteAnisotropies:
@@ -89,7 +89,7 @@ class OnSiteAnisotropies:
 
 class MagField:
     #contains either scalar or vectorial value for each spin
-    field:ndarray[(Any,Any,Any,3),float]
+    #field:ndarray[(Any,Any,Any,3),float]
     def __init__(self,size,vec) -> None:
 
         self.field = np.ndarray((size[0],size[1],size[2],3),float)
@@ -182,13 +182,13 @@ def get_Matshell(matfolder)-> List:
 
 class System:
     size:None
-    grid:ndarray[(Any, Any,Any,3), float]
+    #grid:ndarray[(Any, Any,Any,3), float]
     #temperature_Field:TempField
     mag_Field:MagField 
     onSiteAnisotropies:OnSiteAnisotropies
     startTime = 0
     endTime = 10
-    timestep = 0.00000000000001
+    timestep = 10**(-12)
     currentTime = 0
     matshells:Matshell
     alpha:float
@@ -200,7 +200,7 @@ class System:
         self.matshells = get_Matshell(shellfolder) 
         self.size = size
         self.grid = self.init_grid()
-        self.mag_Field = MagField(self.size,np.array([0,0,0])) # how do we update this
+        self.mag_Field = MagField(self.size,np.array([0,0,0])) 
         #self.temperature_Field = TempField(self.size,0)
         self.onSiteAnisotropies = OnSiteAnisotropies(self.size,0)
         self.alpha = self.matshells[0].alpha
@@ -229,8 +229,8 @@ class System:
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
                     if j > self.size[1]-2:
-                        #self.mag_Field.field[i,j,k] =  5* np.array((np.sin(self.currentTime),np.cos(self.currentTime),1))
-                        self.mag_Field.field[i,j,k] =   np.array((0,0,1))
+                        self.mag_Field.field[i,j,k] =  5* np.array((np.sin(self.currentTime),np.cos(self.currentTime),1))
+                        #self.mag_Field.field[i,j,k] =   np.array((0,0,1))
                     
         return self.mag_Field.field
 
