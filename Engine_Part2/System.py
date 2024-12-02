@@ -58,14 +58,14 @@ class Matshell:
         return str(self)
    
 
-
-    
-def getnormspin():
-    def normalize(temp) -> ndarray:
+def normalize(temp) -> ndarray:
         norm = np.linalg.norm(temp)
         if norm == 0: 
             raise ValueError('Some of your vectors have a norm of 0. I cant normalise that')
         return temp / norm
+    
+def getnormspin():
+
     temp = np.array([rd.random(),rd.random(),rd.random()])
     while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
             temp = np.array([rd.random(),rd.random(),rd.random()])
@@ -188,7 +188,8 @@ class System:
     onSiteAnisotropies:OnSiteAnisotropies
     startTime = 0
     endTime = 10
-    timestep = 10**(-12)
+    timestep = 10**(-14)
+    #timestep = 0.01
     currentTime = 0
     matshells:Matshell
     alpha:float
@@ -228,8 +229,19 @@ class System:
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
-                    if j > self.size[1]-2:
-                        self.mag_Field.field[i,j,k] =  5* np.array((np.sin(self.currentTime),np.cos(self.currentTime),1))
+                    #if j > self.size[1]-1:
+                    if j < 1:
+                        #self.grid[i,j,k] =  normalize( np.array((np.sin(self.currentTime),np.cos(self.currentTime),5)))
+                        self.grid[i,j,k] =  normalize( np.array((np.sin(self.currentTime*3.5*10**12),np.cos(self.currentTime*3.5*10**12),3)))
+                        #if i <1:
+                        #    print(np.sin(self.currentTime*10**13))
+                        #    print(i,j,k)
+                        #    print(self.grid[i,j,k])
+                        #temp = np.array([rd.random(),rd.random(),rd.random()])
+                        #while np.linalg.norm(temp) == 0:  #making sure we dont acidentally get [0,0,0]
+                        #        temp = np.array([rd.random(),rd.random(),rd.random()])
+                        #self.grid[i,j,k] = normalize(temp)
+                        #self.mag_Field.field[i,j,k] =  normalize( np.array((np.sin(self.currentTime),np.cos(self.currentTime),100)))
                         #self.mag_Field.field[i,j,k] =   np.array((0,0,1))
                     
         return self.mag_Field.field

@@ -53,7 +53,7 @@ class Cube(BaseModel):
         theta_x = 0
         theta_z = np.arccos(gr.grid[self.idx[0],self.idx[1],self.idx[2],2])
         theta_y = np.arctan2(gr.grid[self.idx[0],self.idx[1],self.idx[2],1],gr.grid[self.idx[0],self.idx[1],self.idx[2],0])
-
+        
         
         self.rot = glm.vec3([theta_x,theta_y,theta_z])
         
@@ -132,10 +132,13 @@ class Vec(BaseModel):
         theta_z = np.arccos(gr.grid[self.idx[0],self.idx[1],self.idx[2],2])
         theta_y = np.arctan2(gr.grid[self.idx[0],self.idx[1],self.idx[2],1],gr.grid[self.idx[0],self.idx[1],self.idx[2],0])
     
-        if (gr.grid[self.idx[0],self.idx[1],self.idx[2],1] < 0.1) & (gr.grid[self.idx[0],self.idx[1],self.idx[2],0] < 0.1):
+        if (np.abs(gr.grid[self.idx[0],self.idx[1],self.idx[2],1]) < 0.001) & (np.abs(gr.grid[self.idx[0],self.idx[1],self.idx[2],0]) < 0.001):
           theta_y = 0
         
-        
+        #if self.idx[0] < 1:
+        #    if self.idx[1] < 1:
+        #        print(self.idx[0],self.idx[1],self.idx[2])
+         #       print(gr.grid[self.idx[0],self.idx[1],self.idx[2],2],theta_z)
 
         self.rot = glm.vec3([0,theta_y,theta_z])
         
