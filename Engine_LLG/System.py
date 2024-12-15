@@ -188,7 +188,7 @@ class System:
     onSiteAnisotropies:OnSiteAnisotropies
     startTime = 0
     endTime = 10
-    timestep = 10**(-14)
+    timestep = 10**(-15)
     #timestep = 0.01
     currentTime = 0
     matshells:Matshell
@@ -229,8 +229,14 @@ class System:
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 for k in range(self.size[2]):
-                    if j < 1:
-                        grid[i,j,k] =  normalize( np.array((np.sin(self.currentTime*4.5*10**12),np.cos(self.currentTime*4.5*10**12),1)))
+                    #if j < 1:
+                    if (i == 7) & (j == 7):
+                        if (self.currentTime > 0.5 *10**(-13))&(self.currentTime < 10**(-12)):
+                            
+                                #grid[i,j,k] =  normalize( np.array((np.sin(self.currentTime*30*10**12),np.cos(self.currentTime*30*10**12),0.5)))
+                                grid[i,j,k] =  normalize(np.array([1,0,0]))
+                        if (self.currentTime > 10**(-12))&(self.currentTime < 0.0005* 10**(-12)):
+                             grid[i,j,k] =  normalize(np.array([0,0,1]))
         
         return self.mag_Field.field
 
